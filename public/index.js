@@ -1,5 +1,11 @@
 let transactions = [];
 let myChart;
+const request = window.indexedDB.open("budget", 1);
+request.onupgradeneeded = event => {
+  const db = event.target.result;
+  const budget = db.createObjectStore("budget", {keyPath: "listID"});
+  budget.createIndex("statusIndex", "status"); 
+}
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -84,6 +90,44 @@ function populateChart() {
         }]
     }
   });
+}
+
+function saveRecord(newRecord) {
+      // Opens a transaction, accesses the toDoList objectStore and statusIndex.
+      request.onsuccess = () => {
+        const db = request.result;
+        const transaction = db.transaction(["budget"], "readwrite");
+        const budget = transaction.objectStore("budget");
+        budget.add(newRecord);
+       
+        // // Return an item by keyPath
+        // const getRequest = toDoListStore.get("1");
+        // getRequest.onsuccess = () => {
+        //   console.log("Number 1:",getRequest.result);
+        // };
+
+
+
+        // const statusIndex = toDoListStore.index("statusIndex");
+
+        // // Return an item by index
+        // const getRequestIdx = statusIndex.getAll("complete");
+        // getRequestIdx.onsuccess = () => {
+        //   console.log("completed items", getRequestIdx.result); 
+        // }; 
+
+        // const nextRequest = statusIndex.getAll("backlog");
+        // nextRequest.onsuccess = () => {
+        //   console.log("backlog items", nextRequest.result); 
+        // }; 
+
+        // const anotherGetRequest = toDoListStore.get("44");
+        // anotherGetRequest.onsuccess = () => {
+        //   console.log("Number 1:",anotherGetRequest.result);
+        // };
+
+
+      };
 }
 
 function sendTransaction(isAdding) {
